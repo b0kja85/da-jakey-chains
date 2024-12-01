@@ -1,3 +1,11 @@
 import streamlit as st
 
-st.write("Hello World!")
+# Page Setup 
+home = st.Page(
+    page="home.py",
+    default=True
+)
+
+# Page Navigation
+pg = st.navigation(pages=[home])
+pg.run()

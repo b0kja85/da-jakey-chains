@@ -1,3 +1,6 @@
 # ENV VARIABLE
 
 /env 
+
+# Pycache
+/__pycache__
