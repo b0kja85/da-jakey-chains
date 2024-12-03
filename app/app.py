@@ -42,25 +42,25 @@ else:
 # Main Content
 if st.session_state.df is not None:
     with tab1:
-        st.header("Data Cleaning")
+        st.header("Data Cleaning", anchor=False)
 
         # Cleaner instance
         cleaner = dc(st.session_state.df)
 
         # Display the CSV title
-        st.subheader(f"Loaded CSV: {st.session_state.uploaded_file_name}")
+        st.subheader(f"Loaded CSV: {st.session_state.uploaded_file_name}", anchor=False)
 
         # Layout: Two columns (left for DataFrame, right for tools)
         col1, col2 = st.columns([3, 1])
 
         with col1:
             # Display the current DataFrame
-            st.subheader("Current Data")
+            st.subheader("Current Data", anchor=False)
             st.dataframe(st.session_state.df)
 
         with col2:
             # Tools Section
-            st.subheader("Tools")
+            st.subheader("Tools", anchor=False)
             
             btn1, btn2 = st.columns([0.5,0.5])
             with btn1:
