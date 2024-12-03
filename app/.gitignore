@@ -4,3 +4,6 @@
 
 # Pycache
 /__pycache__
+
+# Directories
+/sample_csv
