@@ -4,6 +4,11 @@ import pandas as pd
 # Data Cleaning Imports
 from utils.data_cleaner import DataCleaner as dc
 
+# Data Visualization
+import matplotlib.pyplot as plt
+import plotly.express as px
+import plotly.graph_objects as go
+
 # Page Configuration
 st.set_page_config(
     page_title="VisWalis",
@@ -41,6 +46,7 @@ else:
 
 # Main Content
 if st.session_state.df is not None:
+    # Data Cleaning
     with tab1:
         st.header("Data Cleaning", anchor=False)
 
@@ -162,3 +168,6 @@ if st.session_state.df is not None:
             st.success(alert)
         except NameError:
             pass
+
+    # Dashboard 
+    
