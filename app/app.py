@@ -192,17 +192,17 @@ if st.session_state.df is not None:
     # Report Generation
     with tab3:
         st.header("📋 Report Generation", anchor=False)
+        st.write("Generate detailed profiling reports for your dataset.")
 
         df = st.session_state.get("df")  # Retrieve the DataFrame from Session State
 
         if df is not None:
-            
             report_title = st.text_input("Enter Title of the Report: ")
-
+            st.markdown("---")
+            
             if report_title:    
                 profile = ProfileReport(df, title=report_title, explorative=True)
                 profile.config.html.navbar_show = False
-
 
                 try:
                     # Generate the HTML file
