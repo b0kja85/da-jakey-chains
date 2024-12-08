@@ -12,9 +12,48 @@ class Dashboard:
         """Create a Pie Chart for a specific column."""
         return px.pie(self.df, names=column, title=f"Distribution of {column}")
 
-    def create_donut_chart(self, column):
+    def create_donut_chart(self, columns):
         """Create a Donut Chart for a specific column."""
-        return px.pie(self.df, names=column, hole=0.4, title=f"Proportion of {column}")
+        # If only one column is selected
+        if len(columns) == 1:
+            selected_column = columns_for_donut[0]
+            mean_value = self.df[selected_column].mean()
+            median_value = self.df[selected_column].median()
+
+            fallback_data = {
+                'Metric': ['Mean', 'Median'],
+                'Value': [mean_value, median_value]
+            }
+
+            fallback_chart = px.pie(
+                fallback_data,
+                names='Metric',
+                values='Value',
+                hole=0.4,
+                title=f"Summary of {selected_column}"
+            )
+
+            st.plotly_chart(fallback_chart, use_container_width=True)
+
+        # If more than one column is selected
+        elif len(columns) > 1:
+            averages = {col: self.df[col].mean() for col in columns}
+
+            donut_data = {
+                'Subject': list(averages.keys()),
+                'Average': list(averages.values())
+            }
+
+            donut_chart = px.pie(
+                donut_data,
+                names='Subject',
+                values='Average',
+                hole=0.4,
+                title=f"Average of {', '.join(columns)}"
+            )
+
+            return st.plotly_chart(donut_chart, use_container_width=True)
+    
 
     def create_area_plot(self, x_column, y_columns):
         """Create an Area Plot with X and Y columns."""
@@ -130,50 +169,13 @@ class Dashboard:
             st.subheader("Donut Chart", anchor=False)
             numeric_cols_for_donut = [col for col in self.df.columns if self.df[col].dtype in ['float64', 'int64']]
 
-            # Multi-select for numeric columns to include in the donut chart
-            columns_for_donut = st.multiselect(
-                "Select columns for Donut Chart (e.g., grades):", numeric_cols_for_donut
-            )
-
-            # If only one column is selected
-            if len(columns_for_donut) == 1:
-                selected_column = columns_for_donut[0]
-                mean_value = self.df[selected_column].mean()
-                median_value = self.df[selected_column].median()
-
-                fallback_data = {
-                    'Metric': ['Mean', 'Median'],
-                    'Value': [mean_value, median_value]
-                }
-
-                fallback_chart = px.pie(
-                    fallback_data,
-                    names='Metric',
-                    values='Value',
-                    hole=0.4,
-                    title=f"Summary of {selected_column}"
+            with st.popover("Configure Chart"):
+                # Multi-select for numeric columns to include in the donut chart
+                columns_for_donut = st.multiselect(
+                    "Select columns for Donut Chart (e.g., grades):", numeric_cols_for_donut
                 )
 
-                st.plotly_chart(fallback_chart, use_container_width=True)
-
-            # If more than one column is selected
-            elif len(columns_for_donut) > 1:
-                averages = {col: self.df[col].mean() for col in columns_for_donut}
-
-                donut_data = {
-                    'Subject': list(averages.keys()),
-                    'Average': list(averages.values())
-                }
-
-                donut_chart = px.pie(
-                    donut_data,
-                    names='Subject',
-                    values='Average',
-                    hole=0.4,
-                    title="Average of Columns"
-                )
-
-                st.plotly_chart(donut_chart, use_container_width=True)
+            self.create_donut_chart(columns_for_donut)
 
         st.markdown("---")  
 
