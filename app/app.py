@@ -4,6 +4,9 @@ import pandas as pd
 # Data Cleaning Imports
 from utils.data_cleaner import DataCleaner as dc
 
+# Data Visualization
+from dashboard import Dashboard
+
 # Page Configuration
 st.set_page_config(
     page_title="VisWalis",
@@ -41,6 +44,7 @@ else:
 
 # Main Content
 if st.session_state.df is not None:
+    # Data Cleaning
     with tab1:
         st.header("Data Cleaning", anchor=False)
 
@@ -162,3 +166,19 @@ if st.session_state.df is not None:
             st.success(alert)
         except NameError:
             pass
+
+    # Dashboard
+    with tab2:
+        st.header("📊 Dashboard", anchor=False)
+        st.write("Explore your data through interactive visualizations")
+
+        df = st.session_state.get('df')  # Set df based on the Session State
+
+        if df is not None:
+            # Instantiate the Dashboard class
+            dashboard = Dashboard(df)
+            
+            # Render the dashboard
+            dashboard.render()
+        else:
+            st.warning("Please upload a CSV file to view the dashboard.")
