@@ -128,13 +128,52 @@ class Dashboard:
         with col2:
             # Donut Chart
             st.subheader("Donut Chart", anchor=False)
-            with st.popover("Configure Chart"):
-                column_for_donut = st.selectbox("Select a column for the Donut Chart:", self.df.columns, key="donut")
-            if column_for_donut:
-                donut_chart = self.create_donut_chart(column_for_donut)
+            numeric_cols_for_donut = [col for col in self.df.columns if self.df[col].dtype in ['float64', 'int64']]
+
+            # Multi-select for numeric columns to include in the donut chart
+            columns_for_donut = st.multiselect(
+                "Select columns for Donut Chart (e.g., grades):", numeric_cols_for_donut
+            )
+
+            # If only one column is selected
+            if len(columns_for_donut) == 1:
+                selected_column = columns_for_donut[0]
+                mean_value = self.df[selected_column].mean()
+                median_value = self.df[selected_column].median()
+
+                fallback_data = {
+                    'Metric': ['Mean', 'Median'],
+                    'Value': [mean_value, median_value]
+                }
+
+                fallback_chart = px.pie(
+                    fallback_data,
+                    names='Metric',
+                    values='Value',
+                    hole=0.4,
+                    title=f"Summary of {selected_column}"
+                )
+
+                st.plotly_chart(fallback_chart, use_container_width=True)
+
+            # If more than one column is selected
+            elif len(columns_for_donut) > 1:
+                averages = {col: self.df[col].mean() for col in columns_for_donut}
+
+                donut_data = {
+                    'Subject': list(averages.keys()),
+                    'Average': list(averages.values())
+                }
+
+                donut_chart = px.pie(
+                    donut_data,
+                    names='Subject',
+                    values='Average',
+                    hole=0.4,
+                    title="Average of Columns"
+                )
+
                 st.plotly_chart(donut_chart, use_container_width=True)
-
-
 
         st.markdown("---")  
 
