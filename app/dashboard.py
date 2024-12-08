@@ -110,7 +110,7 @@ class Dashboard:
         # Overall Visualizations
         st.subheader("Overall Visualizations", anchor=False)
         # Gauge Metrics
-        st.subheader("Gauge Metrics",  anchor=False)
+        st.subheader("⏲ Gauge Metrics",  anchor=False)
         gauge1, gauge2, gauge3 = st.columns(3)
 
         with gauge1:
@@ -167,7 +167,7 @@ class Dashboard:
 
         with col1:
             # Pie Chart
-            st.subheader("Pie Chart", anchor=False)
+            st.subheader("🎯 Pie Chart", anchor=False)
             with st.popover("Configure Chart"):
                 column_for_pie = st.selectbox("Select a column for the Pie Chart:", self.df.columns)
             if column_for_pie:
@@ -176,7 +176,7 @@ class Dashboard:
 
         with col2:
             # Donut Chart
-            st.subheader("Donut Chart", anchor=False)
+            st.subheader("🎯 Donut Chart", anchor=False)
             numeric_cols_for_donut = [col for col in self.df.columns if self.df[col].dtype in ['float64', 'int64']]
 
             with st.popover("Configure Chart"):
@@ -195,7 +195,7 @@ class Dashboard:
 
         with col3:
             # Area Plot
-            st.subheader("Area Plot", anchor=False)
+            st.subheader("📈 Area Plot", anchor=False)
             with st.popover("Configure Chart"):
                 area_x = st.selectbox("Select X-axis for Area Plot:", self.numeric_cols, key="area_x")
                 area_y = st.multiselect("Select Y-axis for Area Plot:", self.numeric_cols, key="area_y")
@@ -205,7 +205,7 @@ class Dashboard:
 
         with col4:
             # Radar Chart
-            st.subheader("Radar Chart", anchor=False)
+            st.subheader("🧭 Radar Chart", anchor=False)
             with st.popover("Configure Chart"):
                 radar_cols = st.multiselect("Select columns for Radar Chart (numeric only):", self.numeric_cols, key="radar_cols")
             if radar_cols:
