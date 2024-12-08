@@ -5,9 +5,7 @@ import pandas as pd
 from utils.data_cleaner import DataCleaner as dc
 
 # Data Visualization
-import matplotlib.pyplot as plt
-import plotly.express as px
-import plotly.graph_objects as go   
+from dashboard import Dashboard
 
 # Page Configuration
 st.set_page_config(
@@ -177,75 +175,10 @@ if st.session_state.df is not None:
         df = st.session_state.get('df')  # Set df based on the Session State
 
         if df is not None:
-            # Create layout sections
-            st.subheader("Overall Visualizations", anchor=False)
-            col1, col2 = st.columns(2)
-
-            with col1:
-                # Pie Chart
-                st.subheader("Pie Chart", anchor=False)
-                with st.popover("Configure Chart"):
-                    column_for_pie = st.selectbox("Select a column for the Pie Chart:", df.columns)
-                if column_for_pie:
-                    pie_chart = px.pie(df, names=column_for_pie, title=f"Distribution of {column_for_pie}")
-                    st.plotly_chart(pie_chart, use_container_width=True)
-
-            with col2:
-                # Donut Chart
-                st.subheader("Donut Chart", anchor=False)
-                with st.popover("Configure Chart"):
-                    column_for_donut = st.selectbox("Select a column for the Donut Chart:", df.columns, key="donut")
-                if column_for_donut:
-                    donut_chart = px.pie(df, names=column_for_donut, hole=0.4, title=f"Proportion of {column_for_donut}")
-                    st.plotly_chart(donut_chart, use_container_width=True)
-
-            st.markdown("---")  
-
-            st.subheader("Trend Analysis", anchor=False)
-            col3, col4 = st.columns(2)
-
-            with col3:
-                # Area Plot
-                st.subheader("Area Plot", anchor=False)
-                numeric_cols = df.select_dtypes(include=['float64', 'int64']).columns
-                with st.popover("Configure Chart"):
-                    area_x = st.selectbox("Select X-axis for Area Plot:", numeric_cols, key="area_x")
-                    area_y = st.multiselect("Select Y-axis for Area Plot:", numeric_cols, key="area_y")
-                if area_x and area_y:
-                    area_plot = px.area(df, x=area_x, y=area_y, title=f"Area Plot of {area_x} & {', '.join(area_y)}")
-                    st.plotly_chart(area_plot, use_container_width=True)
-
-            with col4:
-                # Radar Chart
-                st.subheader("Radar Chart", anchor=False)
-                with st.popover("Configure Chart"):
-                    radar_cols = st.multiselect("Select columns for Radar Chart (numeric only):", numeric_cols, key="radar_cols")
-                if radar_cols:
-                    radar_data = df[radar_cols].mean().reset_index()
-                    radar_data.columns = ['Metric', 'Value']
-                    radar_chart = px.line_polar(radar_data, r='Value', theta='Metric', line_close=True, title = f"Radar Chart of {', '.join(radar_cols)}")
-                    st.plotly_chart(radar_chart, use_container_width=True)
-
-            st.markdown("---")
-
-            st.subheader("Gauge Metrics",  anchor=False)
-
-
-            # Gauge Chart
-            st.subheader("Gauge Chart")
-            with st.popover("Configure Chart"):
-                gauge_col = st.selectbox("Select a column for Gauge Chart (numeric only):", numeric_cols, key="gauge_col")
-            if gauge_col:
-                gauge_value = df[gauge_col].mean()
-                fig = go.Figure(go.Indicator(
-                    mode="gauge+number",
-                    value=gauge_value,
-                    title={'text': f"Mean of {gauge_col}"},
-                    gauge={
-                        'axis': {'range': [0, df[gauge_col].max()]},
-                        'bar': {'color': "orange"},
-                    }
-                ))
-                st.plotly_chart(fig, use_container_width=True)
+            # Instantiate the Dashboard class
+            dashboard = Dashboard(df)
+            
+            # Render the dashboard
+            dashboard.render()
         else:
             st.warning("Please upload a CSV file to view the dashboard.")
