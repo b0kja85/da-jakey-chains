@@ -72,6 +72,16 @@ class Dashboard:
             line_color='red',       
             fillcolor='orange'
         ))
+        
+        fig.update_layout(
+            title=f'Radar Chart of {", ".join(columns)}',
+            polar=dict(
+                radialaxis=dict(
+                    visible=True,
+                    range=[0, max(radar_data['Value'])]  # Adjust axis range based on data
+                )
+            )
+        )
         return fig
         
 
