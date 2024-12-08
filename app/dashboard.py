@@ -16,7 +16,7 @@ class Dashboard:
         """Create a Donut Chart for a specific column."""
         # If only one column is selected
         if len(columns) == 1:
-            selected_column = columns_for_donut[0]
+            selected_column = columns[0]
             mean_value = self.df[selected_column].mean()
             median_value = self.df[selected_column].median()
 
@@ -63,7 +63,17 @@ class Dashboard:
         """Create a Radar Chart from selected columns."""
         radar_data = self.df[columns].mean().reset_index()
         radar_data.columns = ['Metric', 'Value']
-        return px.line_polar(radar_data, r='Value', theta='Metric', line_close=True, title=f"Radar Chart of {', '.join(columns)}")
+
+        fig = go.Figure(go.Scatterpolar(
+            r=radar_data['Value'],                # The values for the radar chart
+            theta=radar_data['Metric'],           # The metrics (column names)
+            fill='toself',                        
+            name='Radar Chart',                   
+            line_color='red',       
+            fillcolor='orange'
+        ))
+        return fig
+        
 
     def create_gauge_chart(self, column, metric_type="mean", bar_color="orange", width=100, height=200):
         """Create a Gauge Chart for a specific column and metric type."""
