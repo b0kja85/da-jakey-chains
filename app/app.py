@@ -7,6 +7,12 @@ from utils.data_cleaner import DataCleaner as dc
 # Data Visualization
 from dashboard import Dashboard
 
+# Report Generation
+from ydata_profiling import ProfileReport
+import streamlit.components.v1 as components
+import io
+
+
 # Page Configuration
 st.set_page_config(
     page_title="VisWalis",
@@ -181,4 +187,45 @@ if st.session_state.df is not None:
             # Render the dashboard
             dashboard.render()
         else:
-            st.warning("Please upload a CSV file to view the dashboard.")
+            st.warning("Please upload a CSV file to view the dashboard.", icon="⚠️")
+
+    # Report Generation
+    with tab3:
+        st.header("📋 Report Generation", anchor=False)
+        st.write("Generate detailed profiling reports for your dataset.")
+
+        df = st.session_state.get("df")  # Retrieve the DataFrame from Session State
+
+        if df is not None:
+            report_title = st.text_input("Enter Title of the Report: ")
+            st.markdown("---")
+            
+            if report_title:    
+                profile = ProfileReport(df, title=report_title, explorative=True)
+                profile.config.html.navbar_show = False
+
+                try:
+                    # Generate the HTML file
+                    with st.spinner("Please wait... Generating your Report"):
+                        profile_html = profile.to_html()
+
+                    st.subheader(f"{report_title}", anchor=False)
+                    # Display the profiling report as HTML
+                    components.html(profile_html, height=800, scrolling=True)
+
+                    # Create a downloadable version of the HTML report
+                    report_buffer = io.BytesIO(profile_html.encode())  
+                    st.download_button(
+                        label="Download Report",
+                        data=report_buffer,
+                        file_name = f"{report_title.lower().strip().replace(' ', '_')}_data_profile_report.html",
+                        use_container_width=True
+                    )
+
+                except Exception as e:
+                    st.error(f"Error generating widgets: {str(e)}")
+                    st.warning("Falling back to HTML generation.")
+                    st.markdown(profile.to_html(), unsafe_allow_html=True)
+
+        else:
+            st.warning("Please upload a CSV file to generate a report.", icon="⚠️")
