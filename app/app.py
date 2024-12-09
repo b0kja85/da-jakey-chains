@@ -12,6 +12,8 @@ from ydata_profiling import ProfileReport
 import streamlit.components.v1 as components
 import io
 
+# AI chatbot func import
+from ai import chatbot
 
 # Page Configuration
 st.set_page_config(
@@ -230,3 +232,6 @@ if st.session_state.df is not None:
 
         else:
             st.warning("Please upload a CSV file to generate a report.", icon="⚠️")
+    #AI chatbot
+    with tab4:
+        chatbot()
