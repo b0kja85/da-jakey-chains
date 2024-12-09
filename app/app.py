@@ -52,7 +52,8 @@ else:
 if st.session_state.df is not None:
     # Data Cleaning
     with tab1:
-        st.header("Data Cleaning", anchor=False)
+        st.header("🧹Data Cleaning", anchor=False)
+        st.write("Prepare and clean your dataset for analysis.")
 
         # Cleaner instance
         cleaner = dc(st.session_state.df)
@@ -95,7 +96,7 @@ if st.session_state.df is not None:
 
             # Edit Columns Section
             with st.expander("Edit Columns"):
-                st.subheader("Standardize Column Names")
+                st.subheader("Standardize Column Names", anchor=False)
                 # Options for standardizing column names
                 standardize_case = st.radio("Select case for column names:", ["lowercase", "uppercase", "sentence case"])
                 replace_text = st.text_input("Text to replace in column names:")
@@ -125,7 +126,7 @@ if st.session_state.df is not None:
                     alert = "Column names standardized!"
 
                 # Drop Column
-                st.subheader("Drop Columns")
+                st.subheader("Drop Columns", anchor=False)
                 column_to_drop = st.selectbox("Select column to drop:", st.session_state.df.columns)
                 if st.button("Drop Column"):
                     st.session_state.df = st.session_state.df.drop(columns=[column_to_drop])
@@ -133,7 +134,7 @@ if st.session_state.df is not None:
 
             # Handle Missing Values Section
             with st.expander("Handle Missing Values"):
-                st.subheader("Handle Missing Data")
+                st.subheader("Handle Missing Data", anchor=False)
                 strategy = st.radio("Select strategy to handle missing values:", ["drop", "mean", "median", "mode", "fill"])
                 if strategy == "fill":
                     fill_value = st.text_input("Value to fill missing data with:")
@@ -160,7 +161,7 @@ if st.session_state.df is not None:
 
             # Remove Outliers Section
             with st.expander("Remove Outliers"):
-                st.subheader("Remove Outliers")
+                st.subheader("Remove Outliers", anchor=False)
                 column_for_outliers = st.selectbox("Select column to check for outliers:", st.session_state.df.select_dtypes(include=[float, int]).columns)
                 if st.button("Remove Outliers"):
                     st.session_state.df = cleaner.remove_outliers(columns=[column_for_outliers]).get_cleaned_data()
@@ -176,7 +177,7 @@ if st.session_state.df is not None:
     # Dashboard
     with tab2:
         st.header("📊 Dashboard", anchor=False)
-        st.write("Explore your data through interactive visualizations")
+        st.write("Explore your data through interactive visualizations.")
 
         df = st.session_state.get('df')  # Set df based on the Session State
 

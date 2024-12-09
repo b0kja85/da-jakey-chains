@@ -121,6 +121,7 @@ class Dashboard:
         st.subheader("Overall Visualizations", anchor=False)
         # Gauge Metrics
         st.subheader("⏲ Gauge Metrics",  anchor=False)
+        st.caption("Visualize key metrics like mean, median, or mode for selected numeric columns.")
         gauge1, gauge2, gauge3 = st.columns(3)
 
         with gauge1:
@@ -178,6 +179,7 @@ class Dashboard:
         with col1:
             # Pie Chart
             st.subheader("🎯 Pie Chart", anchor=False)
+            st.caption("Show distribution of categorical data using an intuitive pie chart.")
             with st.popover("Configure Chart"):
                 column_for_pie = st.selectbox("Select a column for the Pie Chart:", self.df.columns)
             if column_for_pie:
@@ -187,6 +189,7 @@ class Dashboard:
         with col2:
             # Donut Chart
             st.subheader("🎯 Donut Chart", anchor=False)
+            st.caption("Display averages or distributions for numeric columns in a donut-style visualization.")
             numeric_cols_for_donut = [col for col in self.df.columns if self.df[col].dtype in ['float64', 'int64']]
 
             with st.popover("Configure Chart"):
@@ -206,6 +209,7 @@ class Dashboard:
         with col3:
             # Area Plot
             st.subheader("📈 Area Plot", anchor=False)
+            st.caption("Analyze trends over time or across categories using an area plot.")
             with st.popover("Configure Chart"):
                 area_x = st.selectbox("Select X-axis for Area Plot:", self.numeric_cols, key="area_x")
                 area_y = st.multiselect("Select Y-axis for Area Plot:", self.numeric_cols, key="area_y")
@@ -216,9 +220,9 @@ class Dashboard:
         with col4:
             # Radar Chart
             st.subheader("🧭 Radar Chart", anchor=False)
+            st.caption("Compare multiple metrics on a radar chart for better insights.")
             with st.popover("Configure Chart"):
                 radar_cols = st.multiselect("Select columns for Radar Chart (numeric only):", self.numeric_cols, key="radar_cols")
             if radar_cols:
                 radar_chart = self.create_radar_chart(radar_cols)
                 st.plotly_chart(radar_chart, use_container_width=True)
-
