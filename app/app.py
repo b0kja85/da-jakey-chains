@@ -18,7 +18,7 @@ from ai import chatbot
 # Page Configuration
 st.set_page_config(
     page_title="VisWalis",
-    page_icon="assets/viswalis-favicon.png",
+    page_icon="static/viswalis-favicon.png",
     layout="wide",
     initial_sidebar_state="expanded",
         menu_items={
@@ -36,7 +36,7 @@ if 'uploaded_file_name' not in st.session_state:
 tab1, tab2, tab3, tab4 = st.tabs(["Data Cleaning", "Dashboard", "Report", "Ask AI"])
 
 # Sidebar
-st.sidebar.image("assets/viswalis-logo.png")
+st.sidebar.image("static/viswalis-logo.png")
 st.sidebar.subheader("🧹 Brushing Off the Mess, 🌟 Visualizing Success!", anchor=False)
 st.sidebar.write("VisWalis simplifies data analysis. Upload a CSV, let us clean it, and explore interactive visualizations.")
 st.sidebar.divider()
