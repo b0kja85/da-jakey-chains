@@ -53,7 +53,7 @@ if st.session_state.df is not None:
     # Data Cleaning
     with tab1:
         st.header("🧹Data Cleaning", anchor=False)
-        st.subheader("Prepare and clean your dataset for analysis.")
+        st.write("Prepare and clean your dataset for analysis.")
 
         # Cleaner instance
         cleaner = dc(st.session_state.df)
@@ -177,7 +177,7 @@ if st.session_state.df is not None:
     # Dashboard
     with tab2:
         st.header("📊 Dashboard", anchor=False)
-        st.write("Explore your data through interactive visualizations")
+        st.write("Explore your data through interactive visualizations.")
 
         df = st.session_state.get('df')  # Set df based on the Session State
 
