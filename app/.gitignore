@@ -7,3 +7,6 @@
 
 # Directories
 /sample_csv
+
+# ENV FILE for API KEYS
+.env 
