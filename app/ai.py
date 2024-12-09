@@ -12,7 +12,6 @@ client = Groq(api_key=api_key)
 def chatbot():
     st.header("🤖 Meet J(AI)ms Charter", anchor=False)
     st.write("Engage with an AI chatbot for assistance and answers to all your questions about Data Analytics.")
-    st.markdown("---")
 
     # Initialize session state for messages
     if "messages" not in st.session_state:
@@ -35,7 +34,8 @@ def chatbot():
         })
 
     # Chat container placeholder
-    chat_placeholder = st.empty()
+    with st.container(height=500, border=False):
+        chat_placeholder = st.empty()
 
     # Render chat messages
     def render_chat():
