@@ -20,7 +20,10 @@ st.set_page_config(
     page_title="VisWalis",
     page_icon="assets/viswalis-favicon.png",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="expanded",
+        menu_items={
+        'About': "# 🧹 VisWalis \nby Jakey Chains | PLM BSCS 4-3 (A.Y. 2024-2025 1st Sem)\n\nrepo: https://github.com/b0kja85/da-jakey-chains"
+    }
 )
 
 # Initialize session state for DataFrame and uploaded file name
@@ -54,7 +57,7 @@ else:
 if st.session_state.df is not None:
     # Data Cleaning
     with tab1:
-        st.header("🧹Data Cleaning", anchor=False)
+        st.header("🧹 Data Cleaning", anchor=False)
         st.write("Prepare and clean your dataset for analysis.")
 
         # Cleaner instance
@@ -232,6 +235,7 @@ if st.session_state.df is not None:
 
         else:
             st.warning("Please upload a CSV file to generate a report.", icon="⚠️")
+    
     #AI chatbot
     with tab4:
         chatbot()
