@@ -52,7 +52,8 @@ else:
 if st.session_state.df is not None:
     # Data Cleaning
     with tab1:
-        st.header("Data Cleaning", anchor=False)
+        st.header("🧹Data Cleaning", anchor=False)
+        st.subheader("Prepare and clean your dataset for analysis.")
 
         # Cleaner instance
         cleaner = dc(st.session_state.df)
@@ -95,7 +96,7 @@ if st.session_state.df is not None:
 
             # Edit Columns Section
             with st.expander("Edit Columns"):
-                st.subheader("Standardize Column Names")
+                st.subheader("Standardize Column Names", anchor=False)
                 # Options for standardizing column names
                 standardize_case = st.radio("Select case for column names:", ["lowercase", "uppercase", "sentence case"])
                 replace_text = st.text_input("Text to replace in column names:")
@@ -125,7 +126,7 @@ if st.session_state.df is not None:
                     alert = "Column names standardized!"
 
                 # Drop Column
-                st.subheader("Drop Columns")
+                st.subheader("Drop Columns", anchor=False)
                 column_to_drop = st.selectbox("Select column to drop:", st.session_state.df.columns)
                 if st.button("Drop Column"):
                     st.session_state.df = st.session_state.df.drop(columns=[column_to_drop])
@@ -133,7 +134,7 @@ if st.session_state.df is not None:
 
             # Handle Missing Values Section
             with st.expander("Handle Missing Values"):
-                st.subheader("Handle Missing Data")
+                st.subheader("Handle Missing Data", anchor=False)
                 strategy = st.radio("Select strategy to handle missing values:", ["drop", "mean", "median", "mode", "fill"])
                 if strategy == "fill":
                     fill_value = st.text_input("Value to fill missing data with:")
@@ -160,7 +161,7 @@ if st.session_state.df is not None:
 
             # Remove Outliers Section
             with st.expander("Remove Outliers"):
-                st.subheader("Remove Outliers")
+                st.subheader("Remove Outliers", anchor=False)
                 column_for_outliers = st.selectbox("Select column to check for outliers:", st.session_state.df.select_dtypes(include=[float, int]).columns)
                 if st.button("Remove Outliers"):
                     st.session_state.df = cleaner.remove_outliers(columns=[column_for_outliers]).get_cleaned_data()
@@ -198,7 +199,52 @@ if st.session_state.df is not None:
 
         if df is not None:
             report_title = st.text_input("Enter Title of the Report: ")
+            # Instantiate the Dashboard class
+            dashboard = Dashboard(df)
+            
+            # Render the dashboard
+            dashboard.render()
+        else:
+            st.warning("Please upload a CSV file to view the dashboard.", icon="⚠️")
+
+    # Report Generation
+    with tab3:
+        st.header("📋 Report Generation", anchor=False)
+        st.write("Generate detailed profiling reports for your dataset.")
+
+        df = st.session_state.get("df")  # Retrieve the DataFrame from Session State
+
+        if df is not None:
+            report_title = st.text_input("Enter Title of the Report: ")
             st.markdown("---")
+            
+            if report_title:    
+                profile = ProfileReport(df, title=report_title, explorative=True)
+                profile.config.html.navbar_show = False
+
+                try:
+                    # Generate the HTML file
+                    with st.spinner("Please wait... Generating your Report"):
+                        profile_html = profile.to_html()
+
+                    st.subheader(f"{report_title}", anchor=False)
+                    # Display the profiling report as HTML
+                    components.html(profile_html, height=800, scrolling=True)
+
+                    # Create a downloadable version of the HTML report
+                    report_buffer = io.BytesIO(profile_html.encode())  
+                    st.download_button(
+                        label="Download Report",
+                        data=report_buffer,
+                        file_name = f"{report_title.lower().strip().replace(' ', '_')}_data_profile_report.html",
+                        use_container_width=True
+                    )
+
+                except Exception as e:
+                    st.error(f"Error generating widgets: {str(e)}")
+                    st.warning("Falling back to HTML generation.")
+                    st.markdown(profile.to_html(), unsafe_allow_html=True)
+
             
             if report_title:    
                 profile = ProfileReport(df, title=report_title, explorative=True)
