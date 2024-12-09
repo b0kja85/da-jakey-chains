@@ -2,104 +2,78 @@ import os
 from groq import Groq
 import streamlit as st
 
+from dotenv import load_dotenv
+
 # Initialize the Groq client
-os.environ["GROQ_API_KEY"] = "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"
-client = Groq()
+load_dotenv()
+api_key = os.getenv("GROQ_API_KEY") # Add your API Key Here
+client = Groq(api_key=api_key)
 
 def chatbot():
-    """Render the chatbot interface in Streamlit with a small, sticky input box."""
-    # Inject custom CSS for compact and chat-like design
-    st.markdown(
-        """
-        <style>
-        /* General Chat Styling */
-        .stChatMessage {
-            margin-bottom: 10px;
-        }
-        .stChatMessage div {
-            font-size: 14px;
-        }
+    st.header("🤖 Meet J(AI)ms Charter", anchor=False)
+    st.write("Engage with an AI chatbot for assistance and answers to all your questions about Data Analytics.")
+    st.markdown("---")
 
-        /* Sticky input box */
-        div.stTextInput {
-            position: fixed;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 90%;
-            max-width: 800px;
-            z-index: 10;
-            opacity: 0.8;
-        }
-
-        div.stTextInput input {
-            height: 30px;
-            border: none;
-            font-size: 14px;
-            outline: none;
-            padding: 5px 10px;
-            border-radius: 15px;
-            width: 100%;
-            background-color: #f7f7f7;
-        }
-
-        div.stTextInput input:focus {
-            border: none;
-            outline: none;
-        }
-
-        /* Padding to prevent overlap with sticky input box */
-        .stApp {
-            padding-bottom: 70px;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True,
-    )
-
-    st.header("🤖 Ask AI", anchor=False)
-    st.write("Interact with AI to get assistance or ask questions about your data or app functionality.")
-
-    # Initialize session state to store chat history
+    # Initialize session state for messages
     if "messages" not in st.session_state:
         st.session_state["messages"] = []
 
-    # Display the chat history
-    for message in st.session_state["messages"]:
-        if message["role"] == "user":
-            with st.chat_message("user"):
-                st.markdown(message["content"])
-        elif message["role"] == "assistant":
-            with st.chat_message("assistant"):
-                st.markdown(message["content"])
+    # Initial AI prompt
+    if len(st.session_state["messages"]) == 0:
+        st.session_state["messages"].append({
+            "role": "assistant",
+            "content": (
+                "📊 Hey there! My name is 🤖 J(AI)ms Charter and I'm here to help with all your data analysis needs!\n\n"
+                "I'm an AI assistant specializing in data analysis concepts, methods, and best practices 🧠\n\n"
+                "I can explain statistical techniques, data visualization approaches, and analytical methodologies 💡\n\n"
+                "My goal is to make data analysis concepts fun and useful for you 😊\n\n"
+                "Is there something specific you'd like help with today? Maybe you have a question about a particular statistical method, "
+                "or perhaps you're looking for advice on visualizing your data? \n\n"
+                "🗣️ I'm all ears...or should I say, all code! Let me know what's on your mind, "
+                "and we'll get started on exploring the world of data analysis together."
+            )
+        })
 
-    # Handle user input (stickied at bottom, compact style)
-    if "new_input" not in st.session_state:
-        st.session_state["new_input"] = ""
+    # Chat container placeholder
+    chat_placeholder = st.empty()
 
+    # Render chat messages
+    def render_chat():
+        with chat_placeholder.container():
+            for message in st.session_state["messages"]:
+                if message["role"] == "user":
+                    with st.chat_message("user"):
+                        st.markdown(message["content"])
+                elif message["role"] == "assistant":
+                    with st.chat_message("assistant"):
+                        st.markdown(message["content"])
+
+    # Render existing messages
+    render_chat()
+
+    # User input field
     user_input = st.text_input(
-        "",  # Remove label
-        placeholder="Type your message here...",
-        key="new_input",  # Use a separate key
+        label="",
+        placeholder="Ask J(AI)ms anything! Type your message here...",
+        key="user_input",
     )
+
     if user_input:
-        # Save user input in the session state
-        st.session_state.messages.append({"role": "user", "content": user_input})
-        with st.chat_message("user"):
-            st.markdown(user_input)
+        # Append user message
+        st.session_state["messages"].append({"role": "user", "content": user_input})
 
-        # Generate response from Groq AI
-        with st.chat_message("assistant"):
-            with st.spinner("Thinking..."):
-                try:
-                    response = client.chat.completions.create(
-                        messages=st.session_state["messages"],  # Send conversation history
-                        model="llama3-8b-8192",  # Specify the model
-                    )
-                    ai_reply = response.choices[0].message.content
-                    st.markdown(ai_reply)
-                    # Save assistant's response in session state
-                    st.session_state.messages.append({"role": "assistant", "content": ai_reply})
-                except Exception as e:
-                    st.error(f"An error occurred: {e}")
+        # Generate AI response
+        with st.spinner("Thinking..."):
+            try:
+                response = client.chat.completions.create(
+                    messages=st.session_state["messages"],
+                    model="llama3-8b-8192"
+                )
+                ai_reply = response.choices[0].message.content
+                st.session_state["messages"].append({"role": "assistant", "content": ai_reply})
+            except Exception as e:
+                fallback_message = f"⚠️ An error occurred: {e}"
+                st.session_state["messages"].append({"role": "assistant", "content": fallback_message})
 
+        # Render updated chat
+        render_chat()
