@@ -177,7 +177,7 @@ if st.session_state.df is not None:
                 st.subheader("Advanced Cleaning Tools", anchor=False)
 
                 # Standardize Dates
-                st.write("### Standardize Dates")
+                st.subheader("Standardize Dates", anchor=False)
                 date_column = st.selectbox("Select column with dates:", st.session_state.df.columns)
                 desired_date_format = st.text_input("Enter desired date format (e.g., %Y-%m-%d):", "%Y-%m-%d")
                 if st.button("Standardize Dates"):
@@ -192,7 +192,7 @@ if st.session_state.df is not None:
                     
 
                 # Clean Symbols
-                st.write("### Clean Symbols")
+                st.subheader("Clean Symbols", anchor=False)
                 symbol_column = st.selectbox("Select column to clean symbols:", st.session_state.df.columns, key="symbol_column")
                 unwanted_symbols = st.text_input("Enter symbols to remove (e.g., $,%,&):")
                 if st.button("Remove Symbols"):
@@ -206,7 +206,7 @@ if st.session_state.df is not None:
                         alert = "Please specify symbols to remove."
                     
                 # Replace Values
-                st.write("### Replace Values")
+                st.subheader("Replace Values", anchor=False)
                 replace_column = st.selectbox("Select column to replace values:", st.session_state.df.columns, key="replace_column")
                 value_to_replace = st.text_input("Value to replace:", key="value_to_replace")
                 replacement_value = st.text_input("Replace with:", key="replacement_value")
@@ -221,7 +221,7 @@ if st.session_state.df is not None:
                         alert = "Please specify a value to replace."
 
                 # Convert to Numeric
-                st.write("### Convert to Numeric")
+                st.subheader("Convert to Numeric", anchor=False)
                 numeric_column = st.selectbox("Select column to convert to numeric:", st.session_state.df.columns, key="numeric_column")
                 if st.button("Convert to Numeric"):
                     try:
