@@ -189,8 +189,7 @@ if st.session_state.df is not None:
                         alert = f"Dates in column '{date_column}' standardized to format '{desired_date_format}'!"
                     except Exception as e:
                         alert = f"Error: {str(e)}"
-                    
-
+           
                 # Clean Symbols
                 st.subheader("Clean Symbols", anchor=False)
                 symbol_column = st.selectbox("Select column to clean symbols:", st.session_state.df.columns, key="symbol_column")
