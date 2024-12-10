@@ -13,108 +13,123 @@ class DataCleaner:
         Parameters:
         df (pd.DataFrame): The DataFrame to clean.
         """
-        self.df = df.copy()  # Create a copy of the DataFrame to avoid modifying the original data
-        self.logs = []  # Initialize an empty list to store logs of changes made to the DataFrame
+        self.df = df.copy()  # Create a copy to avoid modifying the original DataFrame
+        self.logs = []  # Initialize logs for tracking changes
 
     def log_changes(self, action, details):
         """
         Log changes made during data cleaning.
 
         Parameters:
-        action (str): A description of the action performed (e.g., "Dropped Missing Values").
-        details (dict): A dictionary with additional details about the action (e.g., affected columns or rows).
+        action (str): Description of the action performed.
+        details (dict): Additional details about the change (e.g., affected rows or columns).
         """
         self.logs.append({"action": action, "details": details})
 
     def standardize_columns(self):
         """
-        Standardize column names by stripping leading/trailing spaces, 
-        converting to lowercase, and replacing spaces with underscores.
-        
+        Standardize column names by stripping spaces, converting to lowercase, 
+        and replacing spaces with underscores.
+
         Returns:
         self: The DataCleaner instance to enable method chaining.
         """
-        old_columns = self.df.columns.tolist()  # Save the original column names
+        old_columns = self.df.columns.tolist()
         self.df.columns = (
             self.df.columns
-            .str.strip()  # Remove leading/trailing spaces from column names
-            .str.lower()  # Convert column names to lowercase
-            .str.replace(" ", "_")  # Replace spaces with underscores in column names
+            .str.strip()
+            .str.lower()
+            .str.replace(" ", "_", regex=False)
         )
-        # Log the change to column names
-        self.log_changes("Standardized Columns", {
+        self.log_changes("Standardized Column Names", {
             "before": old_columns,
             "after": self.df.columns.tolist()
         })
-        return self  # Return the instance for method chaining
+        return self
 
     def handle_missing_values(self, strategy="drop", fill_value=None):
         """
-        Handle missing values in the DataFrame using the specified strategy.
+        Handle missing values in the DataFrame.
 
         Parameters:
-        strategy (str): The method to handle missing values. Options are:
-                        'drop' (drop rows with any missing values),
-                        'mean' (fill missing values with the mean of the column),
-                        'median' (fill missing values with the median of the column),
-                        'mode' (fill missing values with the mode of the column),
-                        'fill' (fill missing values with a custom value provided via fill_value).
-        fill_value (optional): The custom value to fill missing values when the strategy is 'fill'.
+        strategy (str): Strategy for handling missing values.
+        fill_value: Value to fill when strategy is 'fill'.
 
         Returns:
         self: The DataCleaner instance to enable method chaining.
         """
         if strategy == "drop":
-            # Drop rows with any missing values
-            affected_rows = self.df[self.df.isnull().any(axis=1)]  # Identify rows with missing values
-            self.log_changes("Dropped Missing Values", affected_rows)  # Log the dropped rows
-            self.df.dropna(axis=0, how='any', inplace=True)  # Drop the rows in place
-        elif strategy == "mean":
-            # Fill missing values with the mean of the respective columns
-            missing_cols = self.df.columns[self.df.isnull().any()]  # Identify columns with missing values
-            self.log_changes("Filled Missing Values with Mean", missing_cols.tolist())  # Log the columns affected
-            self.df[missing_cols] = self.df[missing_cols].fillna(self.df[missing_cols].mean())  # Fill missing values
-        elif strategy == "median":
-            # Fill missing values with the median of the respective columns
+            affected_rows = self.df[self.df.isnull().any(axis=1)]
+            self.df.dropna(inplace=True)
+            self.log_changes("Dropped Missing Values", {"affected_rows": len(affected_rows)})
+        elif strategy in ["mean", "median", "mode"]:
             missing_cols = self.df.columns[self.df.isnull().any()]
-            self.log_changes("Filled Missing Values with Median", missing_cols.tolist())
-            self.df[missing_cols] = self.df[missing_cols].fillna(self.df[missing_cols].median())
-        elif strategy == "mode":
-            # Fill missing values with the mode of the respective columns
+            fill_func = {"mean": self.df.mean, "median": self.df.median, "mode": lambda: self.df.mode().iloc[0]}[strategy]
+            self.df[missing_cols] = self.df[missing_cols].fillna(fill_func())
+            self.log_changes(f"Filled Missing Values with {strategy.capitalize()}", {"columns": missing_cols.tolist()})
+        elif strategy == "fill" and fill_value is not None:
             missing_cols = self.df.columns[self.df.isnull().any()]
-            self.log_changes("Filled Missing Values with Mode", missing_cols.tolist())
-            self.df[missing_cols] = self.df[missing_cols].fillna(self.df[missing_cols].mode().iloc[0])
-        elif strategy == "fill":
-            # Fill missing values with a custom value
-            if fill_value is not None:
-                missing_cols = self.df.columns[self.df.isnull().any()]
-                self.log_changes("Filled Missing Values with Custom Value", {
-                    "columns": missing_cols.tolist(),
-                    "value": fill_value
-                })
-                self.df[missing_cols] = self.df[missing_cols].fillna(fill_value)
-            else:
-                raise ValueError("fill_value must be provided when strategy is 'fill'")
+            self.df[missing_cols] = self.df[missing_cols].fillna(fill_value)
+            self.log_changes("Filled Missing Values with Custom Value", {"value": fill_value})
         else:
-            raise ValueError("Invalid strategy for handling missing values.")  # Raise an error for invalid strategy
-        return self  # Return the instance for method chaining
-        
-    def drop_column(self, column_name):
+            raise ValueError("Invalid strategy for handling missing values.")
+        return self
+
+    def standardize_dates(self, column, date_format="%Y-%m-%d"):
         """
-        Drop a column from the DataFrame.
+        Standardize dates in a specified column to a uniform format.
 
         Parameters:
-        column_name (str): The name of the column to drop.
+        column (str): Column name containing dates.
+        date_format (str): Desired date format (default: "%Y-%m-%d").
 
         Returns:
         self: The DataCleaner instance to enable method chaining.
         """
-        if column_name in self.df.columns:
-            self.df.drop(columns=[column_name], inplace=True)  # Drop the specified column
-            self.log_changes("Dropped Column", {"column": column_name})  # Log the action
+        if column in self.df.columns:
+            original_values = self.df[column].dropna().tolist()
+            self.df[column] = pd.to_datetime(self.df[column], errors="coerce").dt.strftime(date_format)
+            self.log_changes("Standardized Dates", {"column": column, "original_values": original_values})
         else:
-            raise ValueError(f"Column '{column_name}' does not exist in the DataFrame.")  # Raise an error if the column doesn't exist
-        return self  # Return the instance for method chaining
+            raise ValueError(f"Column '{column}' does not exist.")
+        return self
+
+    def clean_symbols(self, column, symbols):
+        """
+        Remove unnecessary symbols from values in a specified column.
+
+        Parameters:
+        column (str): Column name to clean.
+        symbols (str): String of symbols to remove.
+
+        Returns:
+        self: The DataCleaner instance to enable method chaining.
+        """
+        if column in self.df.columns:
+            original_values = self.df[column].tolist()
+            self.df[column] = self.df[column].replace(f"[{symbols}]", "", regex=True)
+            self.log_changes("Cleaned Symbols", {"column": column, "symbols": symbols, "original_values": original_values})
+        else:
+            raise ValueError(f"Column '{column}' does not exist.")
+        return self
+
+    def convert_to_numeric(self, column):
+        """
+        Convert string representations of numbers to numeric values.
+
+        Parameters:
+        column (str): Column name to convert.
+
+        Returns:
+        self: The DataCleaner instance to enable method chaining.
+        """
+        if column in self.df.columns:
+            original_values = self.df[column].tolist()
+            self.df[column] = pd.to_numeric(self.df[column], errors="coerce")
+            self.log_changes("Converted to Numeric", {"column": column, "original_values": original_values})
+        else:
+            raise ValueError(f"Column '{column}' does not exist.")
+        return self
 
     def drop_duplicates(self):
         """
@@ -123,42 +138,64 @@ class DataCleaner:
         Returns:
         self: The DataCleaner instance to enable method chaining.
         """
-        duplicates = self.df[self.df.duplicated(keep=False)]  # Identify duplicate rows
-        self.log_changes("Dropped Duplicates", duplicates)  # Log the duplicates
-        self.df.drop_duplicates(inplace=True)  # Drop the duplicate rows in place
-        return self  # Return the instance for method chaining
+        duplicates = self.df[self.df.duplicated()]
+        self.df.drop_duplicates(inplace=True)
+        self.log_changes("Dropped Duplicates", {"duplicates_removed": len(duplicates)})
+        return self
 
     def remove_outliers(self, columns=None):
         """
-        Remove outliers from specified columns using the IQR method.
+        Remove outliers using the IQR method.
 
         Parameters:
-        columns (list of str, optional): A list of column names to check for outliers. If None, all numeric columns are considered.
+        columns (list): Columns to check for outliers (default: all numeric columns).
 
         Returns:
         self: The DataCleaner instance to enable method chaining.
         """
         if columns is None:
-            columns = self.df.select_dtypes(include=[np.number]).columns  # Select all numeric columns if none are specified
-        outlier_details = {}
+            columns = self.df.select_dtypes(include=[np.number]).columns
+        outlier_info = {}
         for col in columns:
-            Q1 = self.df[col].quantile(0.25)  # Calculate the first quartile (Q1)
-            Q3 = self.df[col].quantile(0.75)  # Calculate the third quartile (Q3)
-            IQR = Q3 - Q1  # Calculate the interquartile range (IQR)
-            outliers = self.df[
-                (self.df[col] < (Q1 - 1.5 * IQR)) | (self.df[col] > (Q3 + 1.5 * IQR))
-            ]  # Identify outliers using the 1.5 * IQR rule
-            outlier_details[col] = outliers  # Store the outliers for logging
-            self.df = self.df.drop(outliers.index)  # Drop the outliers
-        self.log_changes("Removed Outliers", outlier_details)  # Log the removed outliers
-        return self  # Return the instance for method chaining
+            Q1, Q3 = self.df[col].quantile([0.25, 0.75])
+            IQR = Q3 - Q1
+            outliers = self.df[(self.df[col] < (Q1 - 1.5 * IQR)) | (self.df[col] > (Q3 + 1.5 * IQR))]
+            self.df.drop(outliers.index, inplace=True)
+            outlier_info[col] = len(outliers)
+        self.log_changes("Removed Outliers", outlier_info)
+        return self
+    
+    def normalize_case(self, column, case_type="lowercase"):
+        """
+        Normalize the case of text data in a specified column.
+        """
+        if column not in self.df.columns:
+            raise ValueError(f"Column '{column}' not found in DataFrame.")
+        
+        if case_type == "lowercase":
+            self.df[column] = self.df[column].str.lower()
+        elif case_type == "uppercase":
+            self.df[column] = self.df[column].str.upper()
+        elif case_type == "titlecase":
+            self.df[column] = self.df[column].str.title()
+        return self
+
+    def replace_values(self, column, to_replace, replacement):
+        """
+        Replace specific values in a column.
+        """
+        if column not in self.df.columns:
+            raise ValueError(f"Column '{column}' not found in DataFrame.")
+        
+        self.df[column] = self.df[column].str.replace(to_replace, replacement, regex=False)
+        return self
 
     def get_logs(self):
         """
-        Return the log of changes made during the data cleaning process.
+        Return a log of changes.
 
         Returns:
-        list of dicts: The list of logs detailing each change made to the DataFrame.
+        list: Logs of changes made during cleaning.
         """
         return self.logs
 

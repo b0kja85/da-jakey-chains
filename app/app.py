@@ -172,6 +172,66 @@ if st.session_state.df is not None:
                     st.session_state.df = cleaner.remove_outliers(columns=[column_for_outliers]).get_cleaned_data()
                     alert = f"Outliers removed from column '{column_for_outliers}'!"
 
+            # Advanced Data Cleaning Section
+            with st.expander("Advanced Data Cleaning"):
+                st.subheader("Advanced Cleaning Tools", anchor=False)
+
+                # Standardize Dates
+                st.write("### Standardize Dates")
+                date_column = st.selectbox("Select column with dates:", st.session_state.df.columns)
+                desired_date_format = st.text_input("Enter desired date format (e.g., %Y-%m-%d):", "%Y-%m-%d")
+                if st.button("Standardize Dates"):
+                    try:
+                        st.session_state.df = (
+                            cleaner.standardize_dates(column=date_column, date_format=desired_date_format)
+                            .get_cleaned_data()
+                        )
+                        alert = f"Dates in column '{date_column}' standardized to format '{desired_date_format}'!"
+                    except Exception as e:
+                        alert = f"Error: {str(e)}"
+                    
+
+                # Clean Symbols
+                st.write("### Clean Symbols")
+                symbol_column = st.selectbox("Select column to clean symbols:", st.session_state.df.columns, key="symbol_column")
+                unwanted_symbols = st.text_input("Enter symbols to remove (e.g., $,%,&):")
+                if st.button("Remove Symbols"):
+                    if unwanted_symbols:
+                        st.session_state.df = (
+                            cleaner.clean_symbols(column=symbol_column, symbols=unwanted_symbols)
+                            .get_cleaned_data()
+                        )
+                        alert = f"Unwanted symbols removed from column '{symbol_column}'!"
+                    else:
+                        alert = "Please specify symbols to remove."
+                    
+                # Replace Values
+                st.write("### Replace Values")
+                replace_column = st.selectbox("Select column to replace values:", st.session_state.df.columns, key="replace_column")
+                value_to_replace = st.text_input("Value to replace:", key="value_to_replace")
+                replacement_value = st.text_input("Replace with:", key="replacement_value")
+                if st.button("Replace Values"):
+                    if value_to_replace:
+                        st.session_state.df = (
+                            cleaner.replace_values(column=replace_column, to_replace=value_to_replace, replacement=replacement_value)
+                            .get_cleaned_data()
+                        )
+                        alert = f"Replaced '{value_to_replace}' with '{replacement_value}' in column '{replace_column}'!"
+                    else:
+                        alert = "Please specify a value to replace."
+
+                # Convert to Numeric
+                st.write("### Convert to Numeric")
+                numeric_column = st.selectbox("Select column to convert to numeric:", st.session_state.df.columns, key="numeric_column")
+                if st.button("Convert to Numeric"):
+                    try:
+                        st.session_state.df = (
+                            cleaner.convert_to_numeric(column=numeric_column)
+                            .get_cleaned_data()
+                        )
+                        alert = f"Column '{numeric_column}' converted to numeric type!"
+                    except Exception as e:
+                        alert = f"Error: {str(e)}"
 
         # Success Alert
         try:
