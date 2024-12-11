@@ -1,4 +1,4 @@
-# VisWalis: Responsive Web Application for Data Analysis
+# VisWalis: A Simple Web Application for Data Analytics
 
 
 ![VisWalis-Logo](VisWalis.png "VisWalis")
