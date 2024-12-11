@@ -90,21 +90,29 @@ Input: User questions via chat.
 Output: AI-powered responses.
 
 ## Setup and Execution
-1. Colone the repository
+1. Clone the repository
 
-`git clone https://github.com/b0kja85/da-jakey-chain`
+```
+git clone https://github.com/b0kja85/da-jakey-chain
+```
 
 2. Change the directory to `./app`.
 
-`cd app`
+```
+cd app
+```
 
 3. Install all the required dependencies.
 
-`pip install -r "requirements.txt"`
+```
+pip install -r "requirements.txt"
+```
 
 4. Run Streamlit Server
 
-`streamlit run app.py`
+```
+streamlit run app.py
+```
 
 --- 
 JKMK
