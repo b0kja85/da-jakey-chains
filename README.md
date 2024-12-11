@@ -1,5 +1,8 @@
 # VisWalis: Responsive Web Application for Data Analysis
 
+
+![VisWalis-Logo](VisWalis.png "VisWalis")
+
 ## Overview
 
 VisWalis is a responsive web application designed for streamlined data analysis. It provides features for data cleaning, visualization, report generation, and an AI-powered chatbot.
